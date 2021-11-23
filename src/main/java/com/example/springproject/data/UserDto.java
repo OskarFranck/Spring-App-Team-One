@@ -15,11 +15,13 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @Getter
 @Setter
-@Table(name = "users")
+@Table(name = "users", schema = "spring_base")
 public class UserDto {
     @Id
     @GeneratedValue
-    Long id;
-    private String userName;
+    int id;
     private String email;
+    private String forename;
+    private String surname;
+    private String hashed_password;
 }
