@@ -8,6 +8,7 @@ import com.example.springproject.response.UserResponse;
 import jakarta.ws.rs.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -94,12 +95,6 @@ public class UserService {
     }
 
     public UserDto findUserByName(String userName) {
-//        Optional<UserDto> optionalUserDto = userRepository.findByUserName(userName);
-//        if (optionalUserDto.isPresent()) {
-//            return optionalUserDto;
-//        } else {
-//            return null;
-//        }
-        return null;
+       return userRepository.findByUserName(userName);
     }
 }

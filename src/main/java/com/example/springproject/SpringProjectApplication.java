@@ -1,6 +1,6 @@
 package com.example.springproject;
 
-import com.example.springproject.data.UserDto;
+import com.example.springproject.entity.UserDto;
 import com.example.springproject.service.UserService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -17,12 +17,12 @@ public class SpringProjectApplication {
 //    @Bean
 //    CommandLineRunner run(UserService userService) {
 //        return args -> {
-//            userService.addUser(new UserDto(null,"user1","mail1@mail.com"));
-//            userService.addUser(new UserDto(null,"user2","mail2@mail.com"));
-//            userService.addUser(new UserDto(null,"user3","mail3@mail.com"));
-//            userService.addUser(new UserDto(null,"user4","mail4@mail.com"));
-//            userService.addUser(new UserDto(null,"user5","mail5@mail.com"));
-//            userService.addUser(new UserDto(null,"user6","mail6@mail.com"));
+//            userService.addUser(new UserDto(null,"user1","mail1@mail.com", "pass", true));
+//            userService.addUser(new UserDto(null,"user2","mail2@mail.com", "pass", true));
+//            userService.addUser(new UserDto(null,"user3","mail3@mail.com", "pass", true));
+//            userService.addUser(new UserDto(null,"user4","mail4@mail.com", "pass", true));
+//            userService.addUser(new UserDto(null,"user5","mail5@mail.com", "pass", false));
+//            userService.addUser(new UserDto(null,"user6","mail6@mail.com", "pass", false));
 //        };
 //    }
 }

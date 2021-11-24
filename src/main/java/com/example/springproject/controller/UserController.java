@@ -36,8 +36,13 @@ public class UserController {
     }
 
     @GetMapping("/user")
-    public ResponseEntity<UserDto> getUserByName(@RequestParam(name = "user", required = false) String username) {
-        return ResponseEntity.ok().body(userService.findUserByName(username));
+    public ResponseEntity<?> getUserByName(@RequestParam(name = "user", required = false) String username) {
+        UserDto userDto = userService.findUserByName(username);
+        if (userDto != null) {
+            return ResponseEntity.ok().body(userDto);
+        } else {
+            return ResponseEntity.badRequest().body("User not found");
+        }
     }
 
     @PostMapping("/users")
