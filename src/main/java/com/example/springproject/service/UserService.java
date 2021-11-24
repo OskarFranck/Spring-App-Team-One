@@ -80,4 +80,18 @@ public class UserService {
         return new UserResponse(userDtoOptional.get());
     }
 
+    public ResponseEntity<String> deleteById(Long id) {
+        boolean exists = userRepository.existsById(id);
+        if (!exists) {
+            return ResponseEntity.badRequest().body(
+                    "Student with id" + id + "does not exists");
+        }
+        else {
+            userRepository.deleteById(id);
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    "Student with id" + id + "removed successfully!");
+        }
+    }
+
+
 }
