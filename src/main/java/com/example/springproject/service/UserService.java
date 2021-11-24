@@ -1,20 +1,23 @@
 package com.example.springproject.service;
 
-import com.example.springproject.data.UserDto;
+import com.example.springproject.entity.UserDto;
 
+import com.example.springproject.data.mapper.UserMapper;
 import com.example.springproject.repo.UserRepository;
+import com.example.springproject.response.UserResponse;
+import jakarta.ws.rs.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class UserService {
 
-    final UserRepository userRepository;
+    private final UserRepository userRepository;
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -24,31 +27,79 @@ public class UserService {
         if (emailExists(userDto)) {
             return ResponseEntity.badRequest().body("There is an account with that email address: "
                     + userDto.getEmail());
-        }
-        else {
+        } else {
             userRepository.save(userDto);
             return ResponseEntity.status(HttpStatus.OK).body("Success!");
-       }
+        }
+
     }
 
     private boolean emailExists(UserDto userDto) {
-        UserDto user = userRepository.findAll()
-                .stream().filter(currentUser -> currentUser.getEmail()
-                        .equals(userDto.getEmail()))
-                .collect(Collectors.toList()).get(0);
+        List<UserDto> userList = userRepository.findAll();
+
+        UserDto user = null;
+        if (!userList.isEmpty()){
+            List<UserDto> users = userList.stream().filter(currentUser -> currentUser.getEmail()
+                    .equals(userDto.getEmail())).collect(Collectors.toList());
+            if(!users.isEmpty()){
+                user = users.get(0);
+            }
+        }
         return user != null;
+    }
+
+    public ResponseEntity<String> getUserByEmail(String email) {
+        List<UserDto> userList = userRepository.findAll();
+        UserDto user = null;
+
+        if (!userList.isEmpty()) {
+            List<UserDto> users = userList.stream().filter(userDto -> userDto.getEmail()
+                    .equals(email)).collect(Collectors.toList());
+
+            if(!users.isEmpty()) {
+                user = users.get(0);
+            }
+        }
+        if (user != null) {
+            return ResponseEntity.status(HttpStatus.OK).body("User: " + UserMapper.map(user));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email doesn't exist");
+        }
     }
 
     public List<UserDto> getAll() {
         return userRepository.findAll();
     }
 
-    public UserDto findUserByName(String userName) throws UsernameNotFoundException {
-        UserDto userDto = userRepository.findByUserName(userName);
-        if (userDto != null) {
-            return userDto;
-        } else {
-            throw new UsernameNotFoundException("User not found in DB");
+
+    public UserResponse getUserById(Long id) {
+        Optional<UserDto> userDtoOptional = userRepository.findById(id);
+        if (userDtoOptional.isEmpty()) {
+            throw new NotFoundException();
         }
+        return new UserResponse(userDtoOptional.get());
+    }
+
+    public ResponseEntity<String> deleteById(Long id) {
+        boolean exists = userRepository.existsById(id);
+        if (!exists) {
+            return ResponseEntity.badRequest().body(
+                    "Student with id" + id + "does not exists");
+        }
+        else {
+            userRepository.deleteById(id);
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    "Student with id" + id + "removed successfully!");
+        }
+    }
+
+    public UserDto findUserByName(String userName) {
+//        Optional<UserDto> optionalUserDto = userRepository.findByUserName(userName);
+//        if (optionalUserDto.isPresent()) {
+//            return optionalUserDto;
+//        } else {
+//            return null;
+//        }
+        return null;
     }
 }

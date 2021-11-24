@@ -1,6 +1,7 @@
 package com.example.springproject.controller;
 
-import com.example.springproject.data.UserDto;
+import com.example.springproject.entity.UserDto;
+import com.example.springproject.response.UserResponse;
 import com.example.springproject.service.UserService;
 import org.apache.catalina.User;
 import org.springframework.http.HttpStatus;
@@ -24,31 +25,28 @@ public class UserController {
         return userService.getAll();
     }
 
+    @GetMapping("/users/{id}")
+    public UserResponse getUserById(@PathVariable Long id) {
+        return userService.getUserById(id);
+    }
+
+    @GetMapping("users/{email}")
+    public ResponseEntity<String> getUserByEmail(@PathVariable String email) {
+        return userService.getUserByEmail(email);
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<UserDto> getUserByName(@RequestParam(name = "user", required = false) String username) {
+        return ResponseEntity.ok().body(userService.findUserByName(username));
+    }
+
     @PostMapping("/users")
     public ResponseEntity<String> newUser(@RequestBody UserDto user) {
         return userService.addUser(user);
     }
 
     @DeleteMapping("/users/{id}")
-    public String deleteUserById(@PathVariable Long id){
-//        userService.deleteById(id);
-        return "User with id: " + id + " has been deleted.";
-    }
-
-    @PutMapping("/users/{id}")
-    public UserDto updateUserById(@PathVariable Long id, @RequestBody UserDto user){
-//        if(id!=null) {
-//            //insert custom exception
-//            UserDto newUser = userService.findById(id).orElseThrow();
-//            newUser.setUserName(user.getUserName());
-//            newUser.setEmail(user.getEmail());
-//            return newUser;
-//        }
-        return null;
-    }
-
-    @GetMapping("/user")
-    public ResponseEntity<UserDto> getUserByName(@RequestParam(name = "user", required = false) String username) {
-        return ResponseEntity.ok().body(userService.findUserByName(username));
+    public ResponseEntity<String> deleteUserById(@PathVariable("id") Long id) {
+       return userService.deleteById(id);
     }
 }
