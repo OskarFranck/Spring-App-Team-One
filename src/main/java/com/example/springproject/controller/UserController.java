@@ -2,6 +2,8 @@ package com.example.springproject.controller;
 
 import com.example.springproject.data.UserDto;
 import com.example.springproject.service.UserService;
+import org.apache.catalina.User;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,4 +47,13 @@ public class UserController {
         return null;
     }
 
+    @GetMapping("/user")
+    public ResponseEntity<UserDto> getUserByName(@RequestParam(name = "user", required = false) String username) {
+        UserDto userDto = userService.findUserByName(username);
+        if (userDto != null) {
+            return ResponseEntity.ok().body(userDto);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+    }
 }

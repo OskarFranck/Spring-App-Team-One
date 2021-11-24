@@ -27,8 +27,7 @@ public class UserService {
         else {
             userRepository.save(userDto);
             return ResponseEntity.status(HttpStatus.OK).body("Success!");
-        }
-
+       }
     }
 
     private boolean emailExists(UserDto userDto) {
@@ -41,5 +40,9 @@ public class UserService {
 
     public List<UserDto> getAll() {
         return userRepository.findAll();
+    }
+
+    public UserDto findUserByName(String userName) {
+        return userRepository.findByUserName(userName);
     }
 }
