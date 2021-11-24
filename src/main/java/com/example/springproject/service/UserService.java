@@ -1,7 +1,8 @@
 package com.example.springproject.service;
 
-import com.example.springproject.data.UserDto;
+import com.example.springproject.entity.UserDto;
 
+import com.example.springproject.data.mapper.UserMapper;
 import com.example.springproject.repo.UserRepository;
 import com.example.springproject.response.UserResponse;
 import jakarta.ws.rs.NotFoundException;
@@ -34,18 +35,36 @@ public class UserService {
     }
 
     private boolean emailExists(UserDto userDto) {
-    try {
-        UserDto user = userRepository.findAll()
-                .stream().filter(currentUser -> currentUser.getEmail()
-                        .equals(userDto.getEmail()))
-                .collect(Collectors.toList()).get(0);
+        List<UserDto> userList = userRepository.findAll();
+
+        UserDto user = null;
+        if (!userList.isEmpty()){
+            List<UserDto> users = userList.stream().filter(currentUser -> currentUser.getEmail()
+                    .equals(userDto.getEmail())).collect(Collectors.toList());
+            if(!users.isEmpty()){
+                user = users.get(0);
+            }
+        }
         return user != null;
     }
-    catch(IndexOutOfBoundsException e){
-        e.printStackTrace();
-        return false;
-    }
 
+    public ResponseEntity<String> getUserByEmail(String email) {
+        List<UserDto> userList = userRepository.findAll();
+        UserDto user = null;
+
+        if (!userList.isEmpty()) {
+            List<UserDto> users = userList.stream().filter(userDto -> userDto.getEmail()
+                    .equals(email)).collect(Collectors.toList());
+
+            if(!users.isEmpty()) {
+                user = users.get(0);
+            }
+        }
+        if (user != null) {
+            return ResponseEntity.status(HttpStatus.OK).body("User: " + UserMapper.map(user));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email doesn't exist");
+        }
     }
 
     public List<UserDto> getAll() {
@@ -61,16 +80,4 @@ public class UserService {
         return new UserResponse(userDtoOptional.get());
     }
 
-    public ResponseEntity<String> updateUser(Long id, UserDto user) {
-        if (userRepository.findById(id).isPresent()) {
-            UserDto newUser = userRepository.findById(id).orElseThrow();
-            newUser.setUserName(user.getUserName());
-            newUser.setEmail(user.getEmail());
-            userRepository.save(newUser);
-            return ResponseEntity.status(HttpStatus.OK).body("Successfully updated ");
-        } else {
-            return ResponseEntity.badRequest().body("No user with id " + user.getId() + " was found.");
-        }
-
-    }
 }

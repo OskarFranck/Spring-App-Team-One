@@ -1,13 +1,12 @@
 package com.example.springproject.controller;
 
-import com.example.springproject.data.UserDto;
+import com.example.springproject.entity.UserDto;
 import com.example.springproject.response.UserResponse;
 import com.example.springproject.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
@@ -25,8 +24,13 @@ public class UserController {
     }
 
     @GetMapping("/users/{id}")
-    public UserResponse getUserById(@PathVariable Long id){
+    public UserResponse getUserById(@PathVariable Long id) {
         return userService.getUserById(id);
+    }
+
+    @GetMapping("users/{email}")
+    public ResponseEntity<String> getUserByEmail(@PathVariable String email) {
+        return userService.getUserByEmail(email);
     }
 
     @PostMapping("/users")
@@ -35,15 +39,9 @@ public class UserController {
     }
 
     @DeleteMapping("/users/{id}")
-    public String deleteUserById(@PathVariable Long id){
+    public String deleteUserById(@PathVariable Long id) {
 //        userService.deleteById(id);
         return "User with id: " + id + " has been deleted.";
-    }
-
-    @PutMapping("/users/{id}")
-    public ResponseEntity<String> updateUserById(@PathVariable Long id, @RequestBody UserDto user){
-
-        return userService.updateUser(id, user);
     }
 
 }

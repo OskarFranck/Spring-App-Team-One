@@ -1,6 +1,6 @@
 package com.example.springproject.response;
 
-import com.example.springproject.data.UserDto;
+import com.example.springproject.entity.UserDto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
