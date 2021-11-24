@@ -49,8 +49,6 @@ public class UserController {
 
     @GetMapping("/user")
     public ResponseEntity<UserDto> getUserByName(@RequestParam(name = "user", required = false) String username) {
-        UserDto userDto = userService.findUserByName(username);
-        return ResponseEntity.ok().body(userDto);
-
+        return ResponseEntity.ok().body(userService.findUserByName(username));
     }
 }
