@@ -41,15 +41,9 @@ public class UserController {
     }
 
     @PutMapping("/users/{id}")
-    public UserDto updateUserById(@PathVariable Long id, @RequestBody UserDto user){
-//        if(id!=null) {
-//            //insert custom exception
-//            UserDto newUser = userService.findById(id).orElseThrow();
-//            newUser.setUserName(user.getUserName());
-//            newUser.setEmail(user.getEmail());
-//            return newUser;
-//        }
-        return null;
+    public ResponseEntity<String> updateUserById(@PathVariable Long id, @RequestBody UserDto user){
+
+        return userService.updateUser(id, user);
     }
 
 }

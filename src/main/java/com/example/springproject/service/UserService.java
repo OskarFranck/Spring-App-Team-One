@@ -26,8 +26,7 @@ public class UserService {
         if (emailExists(userDto)) {
             return ResponseEntity.badRequest().body("There is an account with that email address: "
                     + userDto.getEmail());
-        }
-        else {
+        } else {
             userRepository.save(userDto);
             return ResponseEntity.status(HttpStatus.OK).body("Success!");
         }
@@ -35,16 +34,24 @@ public class UserService {
     }
 
     private boolean emailExists(UserDto userDto) {
+    try {
         UserDto user = userRepository.findAll()
                 .stream().filter(currentUser -> currentUser.getEmail()
                         .equals(userDto.getEmail()))
                 .collect(Collectors.toList()).get(0);
         return user != null;
     }
+    catch(IndexOutOfBoundsException e){
+        e.printStackTrace();
+        return false;
+    }
+
+    }
 
     public List<UserDto> getAll() {
         return userRepository.findAll();
     }
+
 
     public UserResponse getUserById(Long id) {
         Optional<UserDto> userDtoOptional = userRepository.findById(id);
@@ -52,5 +59,17 @@ public class UserService {
             throw new NotFoundException();
         }
         return new UserResponse(userDtoOptional.get());
+
+    public ResponseEntity<String> updateUser(Long id, UserDto user) {
+        if (userRepository.findById(id).isPresent()) {
+            UserDto newUser = userRepository.findById(id).orElseThrow();
+            newUser.setUserName(user.getUserName());
+            newUser.setEmail(user.getEmail());
+            userRepository.save(newUser);
+            return ResponseEntity.status(HttpStatus.OK).body("Successfully updated ");
+        } else {
+            return ResponseEntity.badRequest().body("No user with id " + user.getId() + " was found.");
+        }
+
     }
 }
