@@ -74,22 +74,10 @@ public class UserService {
 
     public UserResponse getUserById(Long id) {
         Optional<UserDto> userDtoOptional = userRepository.findById(id);
-        if (!userDtoOptional.isPresent()) {
+        if (userDtoOptional.isEmpty()) {
             throw new NotFoundException();
         }
         return new UserResponse(userDtoOptional.get());
     }
 
-    public ResponseEntity<String> updateUser(Long id, UserDto user) {
-        if (userRepository.findById(id).isPresent()) {
-            UserDto newUser = userRepository.findById(id).orElseThrow();
-            newUser.setUserName(user.getUserName());
-            newUser.setEmail(user.getEmail());
-            userRepository.save(newUser);
-            return ResponseEntity.status(HttpStatus.OK).body("Successfully updated ");
-        } else {
-            return ResponseEntity.badRequest().body("No user with id " + user.getId() + " was found.");
-        }
-
-    }
 }
