@@ -1,11 +1,13 @@
 package com.example.springproject.controller;
 
 import com.example.springproject.data.UserDto;
+import com.example.springproject.response.UserResponse;
 import com.example.springproject.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
@@ -20,6 +22,11 @@ public class UserController {
     @GetMapping("/users")
     public List<UserDto> getAllUsers() {
         return userService.getAll();
+    }
+
+    @GetMapping("/users/{id}")
+    public UserResponse getUserById(@PathVariable Long id){
+        return userService.getUserById(id);
     }
 
     @PostMapping("/users")

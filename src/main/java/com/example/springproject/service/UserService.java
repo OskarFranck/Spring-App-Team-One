@@ -3,11 +3,14 @@ package com.example.springproject.service;
 import com.example.springproject.data.UserDto;
 
 import com.example.springproject.repo.UserRepository;
+import com.example.springproject.response.UserResponse;
+import jakarta.ws.rs.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -49,6 +52,14 @@ public class UserService {
         return userRepository.findAll();
     }
 
+
+    public UserResponse getUserById(Long id) {
+        Optional<UserDto> userDtoOptional = userRepository.findById(id);
+        if (!userDtoOptional.isPresent()) {
+            throw new NotFoundException();
+        }
+        return new UserResponse(userDtoOptional.get());
+
     public ResponseEntity<String> updateUser(Long id, UserDto user) {
         if (userRepository.findById(id).isPresent()) {
             UserDto newUser = userRepository.findById(id).orElseThrow();
@@ -59,5 +70,6 @@ public class UserService {
         } else {
             return ResponseEntity.badRequest().body("No user with id " + user.getId() + " was found.");
         }
+
     }
 }
