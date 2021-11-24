@@ -20,6 +20,7 @@ src/main/resources/applicaiton.properties
 *.iws
 *.iml
 *.ipr
+*.properties
 
 ### NetBeans ###
 /nbproject/private/

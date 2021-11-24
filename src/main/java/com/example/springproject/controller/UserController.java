@@ -1,11 +1,13 @@
 package com.example.springproject.controller;
 
 import com.example.springproject.data.UserDto;
+import com.example.springproject.response.UserResponse;
 import com.example.springproject.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
@@ -20,6 +22,10 @@ public class UserController {
     @GetMapping("/users")
     public List<UserDto> getAllUsers() {
         return userService.getAll();
+    }
+    @GetMapping("/users/{id}")
+    public UserResponse getUserById(@PathVariable Long id){
+        return userService.getUserById(id);
     }
 
     @GetMapping("users/{email}")
@@ -39,15 +45,9 @@ public class UserController {
     }
 
     @PutMapping("/users/{id}")
-    public UserDto updateUserById(@PathVariable Long id, @RequestBody UserDto user){
-//        if(id!=null) {
-//            //insert custom exception
-//            UserDto newUser = userService.findById(id).orElseThrow();
-//            newUser.setUserName(user.getUserName());
-//            newUser.setEmail(user.getEmail());
-//            return newUser;
-//        }
-        return null;
+    public ResponseEntity<String> updateUserById(@PathVariable Long id, @RequestBody UserDto user){
+
+        return userService.updateUser(id, user);
     }
 
 }
