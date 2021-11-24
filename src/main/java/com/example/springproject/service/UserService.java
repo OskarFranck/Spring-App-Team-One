@@ -59,6 +59,7 @@ public class UserService {
             throw new NotFoundException();
         }
         return new UserResponse(userDtoOptional.get());
+    }
 
     public ResponseEntity<String> updateUser(Long id, UserDto user) {
         if (userRepository.findById(id).isPresent()) {
