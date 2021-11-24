@@ -50,11 +50,11 @@ public class UserService {
         List<UserDto> userList = userRepository.findAll();
         UserDto user = null;
 
-        if (!userList.isEmpty()){
+        if (!userList.isEmpty()) {
             List<UserDto> users = userList.stream().filter(userDto -> userDto.getEmail()
                     .equals(email)).collect(Collectors.toList());
 
-            if(!users.isEmpty()){
+            if(!users.isEmpty()) {
                 user = users.get(0);
             }
         }
