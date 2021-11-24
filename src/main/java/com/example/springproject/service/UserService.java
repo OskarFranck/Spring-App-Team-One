@@ -55,7 +55,7 @@ public class UserService {
 
     public UserResponse getUserById(Long id) {
         Optional<UserDto> userDtoOptional = userRepository.findById(id);
-        if (!userDtoOptional.isPresent()) {
+        if (userDtoOptional.isEmpty()) {
             throw new NotFoundException();
         }
         return new UserResponse(userDtoOptional.get());
