@@ -5,6 +5,7 @@ import com.example.springproject.data.UserDto;
 import com.example.springproject.repo.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,7 +43,12 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public UserDto findUserByName(String userName) {
-        return userRepository.findByUserName(userName);
+    public UserDto findUserByName(String userName) throws UsernameNotFoundException {
+        UserDto userDto = userRepository.findByUserName(userName);
+        if (userDto != null) {
+            return userDto;
+        } else {
+            throw new UsernameNotFoundException("User not found in DB");
+        }
     }
 }
