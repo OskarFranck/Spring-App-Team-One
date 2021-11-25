@@ -11,8 +11,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class UserService {
@@ -93,5 +95,30 @@ public class UserService {
         }
     }
 
+    public UserDto findUserByName(String userName) {
+       return userRepository.findByUserName(userName);
+    }
 
+
+    public ResponseEntity<String> updateUserById(Long id, UserDto user) {
+        if (userRepository.findById(id).isPresent()) {
+            UserDto newUser = userRepository.findById(id).orElseThrow();
+            newUser.setUserName(user.getUserName());
+            newUser.setPassword(user.getPassword());
+            newUser.setEmail(user.getEmail());
+            newUser.setAccess(user.getAccess());
+            if(Stream.of(user.getAccess(), user.getEmail(), user.getPassword(), user.getUserName()).anyMatch(Objects::isNull))
+            {
+                return ResponseEntity.badRequest().body("One or more fields are not filled. Please enter a value for all attributes.");
+
+            }
+            else{
+                userRepository.save(newUser);
+            }
+
+            return ResponseEntity.status(HttpStatus.OK).body("Successfully updated ");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No user with id " + id + " was found.");
+        }
+    }
 }
