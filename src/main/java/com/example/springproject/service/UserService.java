@@ -107,15 +107,15 @@ public class UserService {
             newUser.setPassword(user.getPassword());
             newUser.setEmail(user.getEmail());
             newUser.setAccess(user.getAccess());
-//            if(Stream.of(user.getAccess(), user.getEmail(), user.getPassword(), user.getUserName()).anyMatch(Objects::isNull))
-//            {
-//                return ResponseEntity.badRequest().body("One or more fields are not filled. Please enter a value for all attributes.");
-//
-//            }
-//            else{
-//
-//            }
-            userRepository.save(newUser);
+            if(Stream.of(user.getAccess(), user.getEmail(), user.getPassword(), user.getUserName()).anyMatch(Objects::isNull))
+            {
+                return ResponseEntity.badRequest().body("One or more fields are not filled. Please enter a value for all attributes.");
+
+            }
+            else{
+                userRepository.save(newUser);
+            }
+
             return ResponseEntity.status(HttpStatus.OK).body("Successfully updated ");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No user with id " + id + " was found.");
