@@ -8,7 +8,6 @@ import com.example.springproject.response.UserResponse;
 import jakarta.ws.rs.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -96,5 +95,20 @@ public class UserService {
 
     public UserDto findUserByName(String userName) {
        return userRepository.findByUserName(userName);
+    }
+
+
+    public ResponseEntity<String> updateUserById(Long id, UserDto user) {
+        if (userRepository.findById(id).isPresent()) {
+            UserDto newUser = userRepository.findById(id).orElseThrow();
+            newUser.setUserName(user.getUserName());
+            newUser.setPassword(user.getPassword());
+            newUser.setEmail(user.getEmail());
+            newUser.setAccess(user.getAccess());
+            userRepository.save(newUser);
+            return ResponseEntity.status(HttpStatus.OK).body("Successfully updated ");
+        } else {
+            return ResponseEntity.badRequest().body("No user with id " + id + " was found.");
+        }
     }
 }
