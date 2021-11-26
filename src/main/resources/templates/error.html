@@ -1,0 +1,45 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<style>
+    .center-text {
+        text-align: center;
+    }
+    .large-text {
+        font-size: 40px;
+        margin-top: 80px;
+    }
+    .table-items {
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .whole-page:hover {
+        cursor: pointer;
+    }
+
+</style>
+</head>
+<body class="whole-page" onclick="location.href='/'">
+<a class="" href="/">Go Home</a>
+<h1 class="large-text center-text">OOPS!!</h1>
+<h2 class="center-text">Something went wrong!</h2>
+<h3 class="center-text">Our Engineers are on it</h3>
+<table class="table-items">
+    <tr class="table-items">
+        <td>Path</td>
+        <td th:text="${path}"/>
+    </tr>
+    <tr class="table-items">
+        <td>Error</td>
+        <td th:text="${error}"/>
+    </tr>
+    <tr class="table-items">
+        <td>Message</td>
+        <td th:text="${message}"/>
+    </tr>
+    <tr class="table-items">
+        <td>Exception</td>
+        <td th:text="${exception}"/>
+    </tr>
+</table>
+</body>
+</html>
