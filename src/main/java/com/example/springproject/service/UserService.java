@@ -40,10 +40,10 @@ public class UserService {
         List<UserDto> userList = userRepository.findAll();
 
         UserDto user = null;
-        if (!userList.isEmpty()){
+        if (!userList.isEmpty()) {
             List<UserDto> users = userList.stream().filter(currentUser -> currentUser.getEmail()
                     .equals(userDto.getEmail())).collect(Collectors.toList());
-            if(!users.isEmpty()){
+            if (!users.isEmpty()) {
                 user = users.get(0);
             }
         }
@@ -58,7 +58,7 @@ public class UserService {
             List<UserDto> users = userList.stream().filter(userDto -> userDto.getEmail()
                     .equals(email)).collect(Collectors.toList());
 
-            if(!users.isEmpty()) {
+            if (!users.isEmpty()) {
                 user = users.get(0);
             }
         }
@@ -87,8 +87,7 @@ public class UserService {
         if (!exists) {
             return ResponseEntity.badRequest().body(
                     "Student with id" + id + "does not exists");
-        }
-        else {
+        } else {
             userRepository.deleteById(id);
             return ResponseEntity.status(HttpStatus.OK).body(
                     "Student with id" + id + "removed successfully!");
@@ -96,23 +95,24 @@ public class UserService {
     }
 
     public UserDto findUserByName(String userName) {
-       return userRepository.findByUserName(userName);
+        return userRepository.findByUserName(userName);
     }
 
 
     public ResponseEntity<String> updateUserById(Long id, UserDto user) {
+
         if (userRepository.findById(id).isPresent()) {
             UserDto newUser = userRepository.findById(id).orElseThrow();
-            newUser.setUserName(user.getUserName());
-            newUser.setPassword(user.getPassword());
-            newUser.setEmail(user.getEmail());
-            newUser.setAccess(user.getAccess());
-            if(Stream.of(user.getAccess(), user.getEmail(), user.getPassword(), user.getUserName()).anyMatch(Objects::isNull))
-            {
+            //Ugly  code I know
+            if (user.getUserName() != null) newUser.setUserName(user.getUserName());
+            if (user.getPassword() != null) newUser.setPassword(user.getPassword());
+            if (user.getEmail() != null) newUser.setEmail(user.getEmail());
+            if (user.getAccess() != null) newUser.setAccess(user.getAccess());
+
+            if (Stream.of(newUser.getAccess(), newUser.getEmail(), newUser.getPassword(), newUser.getUserName()).anyMatch(Objects::isNull)) {
                 return ResponseEntity.badRequest().body("One or more fields are not filled. Please enter a value for all attributes.");
 
-            }
-            else{
+            } else {
                 userRepository.save(newUser);
             }
 

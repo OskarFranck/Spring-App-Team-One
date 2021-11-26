@@ -3,11 +3,14 @@ package com.example.springproject.controller;
 import com.example.springproject.entity.UserDto;
 import com.example.springproject.response.UserResponse;
 import com.example.springproject.service.UserService;
+import jakarta.ws.rs.Produces;
 import org.apache.catalina.User;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -18,6 +21,12 @@ public class UserController {
 
     public UserController(UserService userService) {
         this.userService = userService;
+    }
+
+    //Returns all users in XML format
+    @GetMapping(value = "/users-xml", produces = { "application/xml" })
+    public List<UserDto> getAllUsersXML() {
+        return userService.getAll();
     }
 
     @GetMapping("/users")
@@ -52,7 +61,7 @@ public class UserController {
 
     @DeleteMapping("/users/{id}")
     public ResponseEntity<String> deleteUserById(@PathVariable("id") Long id) {
-       return userService.deleteById(id);
+        return userService.deleteById(id);
     }
 
     @PutMapping("/users/{id}")
