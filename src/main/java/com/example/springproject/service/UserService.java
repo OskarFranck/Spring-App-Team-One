@@ -8,20 +8,42 @@ import com.example.springproject.response.UserResponse;
 import jakarta.ws.rs.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
+
+    private final PasswordEncoder passwordEncoder;
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        UserDto userDto = userRepository.findByUserName(username);
+        if (userDto == null) {
+            throw new UsernameNotFoundException(username);
+        } else {
+            System.out.println("user found");
+        }
+        Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        // logic to handle access based on boolean
+
+        return new User(userDto.getUserName(), userDto.getPassword(), authorities);
+        // org.springframework.security.core.userdetails.
+    }
 
     private final UserRepository userRepository;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(PasswordEncoder passwordEncoder, UserRepository userRepository) {
+        this.passwordEncoder = passwordEncoder;
         this.userRepository = userRepository;
     }
 
@@ -30,6 +52,7 @@ public class UserService {
             return ResponseEntity.badRequest().body("There is an account with that email address: "
                     + userDto.getEmail());
         } else {
+            userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
             userRepository.save(userDto);
             return ResponseEntity.status(HttpStatus.OK).body("Success!");
         }
