@@ -34,18 +34,18 @@ public class UserController {
         return userService.getAll();
     }
 
-    @GetMapping("/users/{id}")
+    @GetMapping("/users/byid/{id}")
     public UserResponse getUserById(@PathVariable Long id) {
         return userService.getUserById(id);
     }
 
-    @GetMapping("users/{email}")
+    @GetMapping("users/byemail/{email}")
     public ResponseEntity<String> getUserByEmail(@PathVariable String email) {
         return userService.getUserByEmail(email);
     }
 
-    @GetMapping("/user")
-    public ResponseEntity<?> getUserByName(@RequestParam(name = "user", required = false) String username) {
+    @GetMapping("/user/byname/{username}")
+    public ResponseEntity<?> getUserByName(@PathVariable String username) {
         UserDto userDto = userService.findUserByName(username);
         if (userDto != null) {
             return ResponseEntity.ok().body(userDto);
@@ -54,7 +54,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/users")
+    @PostMapping("/users/add")
     public ResponseEntity<String> newUser(@RequestBody UserDto user) {
         return userService.addUser(user);
     }

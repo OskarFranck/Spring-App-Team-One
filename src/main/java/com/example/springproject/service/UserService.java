@@ -34,10 +34,13 @@ public class UserService implements UserDetailsService {
             System.out.println("user found");
         }
         Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        // logic to handle access based on boolean
-
+        if (userDto.getAccess()) {
+            authorities.add(new SimpleGrantedAuthority("admin"));
+            authorities.add(new SimpleGrantedAuthority("user"));
+        } else {
+            authorities.add(new SimpleGrantedAuthority("user"));
+        }
         return new User(userDto.getUserName(), userDto.getPassword(), authorities);
-        // org.springframework.security.core.userdetails.
     }
 
     private final UserRepository userRepository;
