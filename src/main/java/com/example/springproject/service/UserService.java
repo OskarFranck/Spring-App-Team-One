@@ -8,20 +8,42 @@ import com.example.springproject.response.UserResponse;
 import jakarta.ws.rs.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(PasswordEncoder passwordEncoder, UserRepository userRepository) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) {
+        UserDto user = userRepository.findByUserName(username);
+        if(user==null) {
+            throw new NotFoundException("User with username: " + username + "not found");
+        } else {
+            Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
+            String role = user.getAccess() ? "ADMIN" : "USER";
+            authorities.add(new SimpleGrantedAuthority(role));
+            return new User(user.getUserName(), user.getPassword(), authorities);
+            }
+        }
 
     public ResponseEntity<String> addUser(UserDto userDto) {
         if (emailExists(userDto)) {
@@ -29,6 +51,7 @@ public class UserService {
                     + userDto.getEmail());
         } else {
             userRepository.save(userDto);
+            userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
             return ResponseEntity.status(HttpStatus.OK).body("Success!");
         }
 
