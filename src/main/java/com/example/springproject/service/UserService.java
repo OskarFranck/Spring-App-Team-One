@@ -17,9 +17,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -30,21 +32,23 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    public UserService(PasswordEncoder passwordEncoder, UserRepository userRepository) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) {
         UserDto user = userRepository.findByUserName(username);
-        String role;
-        if (user == null) {
-            throw new UsernameNotFoundException("User not found in the database");
+        if(user==null) {
+            throw new NotFoundException("User with username: " + username + "not found");
         } else {
             Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
-            role = user.getAccess() ? "ADMIN" : "USER";
-
+            String role = user.getAccess() ? "ADMIN" : "USER";
             authorities.add(new SimpleGrantedAuthority(role));
-
             return new User(user.getUserName(), user.getPassword(), authorities);
+            }
         }
-    }
 
     public ResponseEntity<String> addUser(UserDto userDto) {
         if (emailExists(userDto)) {
@@ -89,7 +93,7 @@ public class UserService implements UserDetailsService {
         return new UserResponse(userDtoOptional.get());
     }
 
-    public ResponseEntity<String> deleteById(Long id) {
+    public ResponseEntity<?> deleteById(Long id) {
         boolean exists = userRepository.existsById(id);
         if (!exists) {
             return ResponseEntity.badRequest().body(
@@ -97,7 +101,7 @@ public class UserService implements UserDetailsService {
         } else {
             userRepository.deleteById(id);
             return ResponseEntity.status(HttpStatus.OK).body(
-                    "Student with id" + id + "removed successfully!");
+                    "Student with id" + id + "removed successfully");
         }
     }
 

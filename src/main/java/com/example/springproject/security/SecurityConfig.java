@@ -14,8 +14,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
+import static org.springframework.http.HttpMethod.*;
+import static org.springframework.security.config.http.SessionCreationPolicy.*;
 
 @Configuration
 @EnableWebSecurity
@@ -36,8 +36,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.csrf().disable();
         http.sessionManagement().sessionCreationPolicy(STATELESS);
         http.authorizeRequests().antMatchers("/api/login/**").permitAll();
-        http.authorizeRequests().antMatchers(GET, "/api/user/**").authenticated();
-        http.authorizeRequests().antMatchers("/api/user/create").permitAll();
+        http.authorizeRequests().antMatchers(GET, "/api/users/**").hasAnyAuthority("USER, ADMIN");
+        http.authorizeRequests().antMatchers(POST, "/api/users/**").hasAnyAuthority("USER, ADMIN");
+        http.authorizeRequests().antMatchers(PUT, "/api/users/**").hasAnyAuthority("ADMIN");
+        http.authorizeRequests().antMatchers(DELETE, "/api/users/**").hasAnyAuthority("ADMIN");
         http.authorizeRequests().anyRequest().authenticated();
         http.addFilter(customAuthenticationFilter);
         http.addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
