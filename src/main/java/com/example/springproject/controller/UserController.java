@@ -29,22 +29,22 @@ public class UserController {
         return userService.getAll();
     }
 
-    @GetMapping(value ="/users", produces = { "application/json" })
+    @GetMapping("/users")
     public List<UserDto> getAllUsers() {
         return userService.getAll();
     }
 
-    @GetMapping(value ="/users/{id}", produces = { "application/json" })
+    @GetMapping("/users/{id}")
     public UserResponse getUserById(@PathVariable Long id) {
         return userService.getUserById(id);
     }
 
-    @GetMapping(value ="users/{email}", produces = { "application/json" })
+    @GetMapping("users/{email}")
     public ResponseEntity<String> getUserByEmail(@PathVariable String email) {
         return userService.getUserByEmail(email);
     }
 
-    @GetMapping(value ="/user", produces = { "application/json" })
+    @GetMapping("/user")
     public ResponseEntity<?> getUserByName(@RequestParam(name = "user", required = false) String username) {
         UserDto userDto = userService.findUserByName(username);
         if (userDto != null) {
@@ -54,17 +54,17 @@ public class UserController {
         }
     }
 
-    @PostMapping(value ="/users",consumes={"application/json"}, produces = { "application/json" })
+    @PostMapping("/users")
     public ResponseEntity<String> newUser(@RequestBody UserDto user) {
         return userService.addUser(user);
     }
 
-    @DeleteMapping(value ="/users/{id}")
+    @DeleteMapping("/users/{id}")
     public ResponseEntity<String> deleteUserById(@PathVariable("id") Long id) {
         return userService.deleteById(id);
     }
 
-    @PutMapping(value ="/users/{id}")
+    @PutMapping("/users/{id}")
     public ResponseEntity<String> updateUserById(@PathVariable("id") Long id, @RequestBody UserDto user) {
         return userService.updateUserById(id, user);
     }

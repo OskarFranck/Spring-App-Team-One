@@ -1,28 +1,49 @@
 package com.example.springproject.service;
 
 import com.example.springproject.entity.UserDto;
-
-import com.example.springproject.data.mapper.UserMapper;
 import com.example.springproject.repo.UserRepository;
 import com.example.springproject.response.UserResponse;
 import jakarta.ws.rs.NotFoundException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
-public class UserService {
+@RequiredArgsConstructor
+@Transactional
+@Slf4j
+public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        UserDto user = userRepository.findByUserName(username);
+        String role;
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found in the database");
+        } else {
+            Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
+            role = user.getAccess() ? "ADMIN" : "USER";
+
+            authorities.add(new SimpleGrantedAuthority(role));
+
+            return new User(user.getUserName(), user.getPassword(), authorities);
+        }
     }
 
     public ResponseEntity<String> addUser(UserDto userDto) {
@@ -30,6 +51,7 @@ public class UserService {
             return ResponseEntity.badRequest().body("There is an account with that email address: "
                     + userDto.getEmail());
         } else {
+            userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
             userRepository.save(userDto);
             return ResponseEntity.status(HttpStatus.OK).body("Success!");
         }
@@ -50,23 +72,8 @@ public class UserService {
         return user != null;
     }
 
-    public ResponseEntity<String> getUserByEmail(String email) {
-        List<UserDto> userList = userRepository.findAll();
-        UserDto user = null;
-
-        if (!userList.isEmpty()) {
-            List<UserDto> users = userList.stream().filter(userDto -> userDto.getEmail()
-                    .equals(email)).collect(Collectors.toList());
-
-            if (!users.isEmpty()) {
-                user = users.get(0);
-            }
-        }
-        if (user != null) {
-            return ResponseEntity.status(HttpStatus.OK).body("User: " + UserMapper.map(user));
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email doesn't exist");
-        }
+    public UserDto getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
     public List<UserDto> getAll() {
