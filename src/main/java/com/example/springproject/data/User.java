@@ -13,7 +13,6 @@ public class User {
 
     @NotNull
     private String email;
-    private String forename;
-    private String surname;
+    private String userName;
 
 }
