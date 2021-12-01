@@ -4,8 +4,6 @@ import com.example.springproject.entity.UserDto;
 import com.example.springproject.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,9 +13,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -44,6 +43,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         }
     }
 
+    @Override
     public Optional<UserDto> createUser(UserDto userDto) {
         Optional<UserDto> userOptional = getUserByEmail(userDto.getEmail());
 
@@ -61,50 +61,59 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         return userOptional.isPresent() || userOptional2.isPresent();
     }
 
+    @Override
     public Optional<UserDto> getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
+    @Override
     public List<UserDto> getAll() {
         return userRepository.findAll();
     }
 
 
+    @Override
     public Optional<UserDto> getUserById(Long id) {
         return userRepository.findById(id);
     }
 
+    @Override
     public Optional<UserDto> deleteById(Long id) {
         Optional<UserDto> userOptional = userRepository.findById(id);
         if (userOptional.isPresent()) userRepository.deleteById(id);
         return userOptional;
     }
 
+    @Override
     public Optional<UserDto> getUserByName(String userName) {
         return userRepository.findByUserName(userName);
     }
 
 
-    public ResponseEntity<String> updateUserById(Long id, UserDto user) {
+    @Override
+    public Optional<UserDto> updateUserByUserName(String userName, Integer choice, UserDto userDto) {
+        Optional<UserDto> userOptional = userRepository.findByUserName(userName);
 
-        if (userRepository.findById(id).isPresent()) {
-            UserDto newUser = userRepository.findById(id).orElseThrow();
-            //Ugly  code I know
-            if (user.getUserName() != null) newUser.setUserName(user.getUserName());
-            if (user.getPassword() != null) newUser.setPassword(user.getPassword());
-            if (user.getEmail() != null) newUser.setEmail(user.getEmail());
-            if (user.getAccess() != null) newUser.setAccess(user.getAccess());
+        if (userOptional.isEmpty()) return userOptional;
 
-            if (Stream.of(newUser.getAccess(), newUser.getEmail(), newUser.getPassword(), newUser.getUserName()).anyMatch(Objects::isNull)) {
-                return ResponseEntity.badRequest().body("One or more fields are not filled. Please enter a value for all attributes.");
+        UserDto user = userOptional.get();
 
-            } else {
-                userRepository.save(newUser);
-            }
-
-            return ResponseEntity.status(HttpStatus.OK).body("Successfully updated ");
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No user with id " + id + " was found.");
+        switch (choice) {
+            case 1:
+                user.setUserName(userDto.getUserName());
+                break;
+            case 2:
+                user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+                break;
+            case 3:
+                user.setEmail(userDto.getEmail());
+                break;
+            default:
+                break;
         }
+        userRepository.save(user);
+
+        return userOptional;
+
     }
 }
