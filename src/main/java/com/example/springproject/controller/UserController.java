@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin(origins = "*")
 @RequestMapping("/api")
 public class UserController {
 
@@ -26,17 +27,17 @@ public class UserController {
         return userService.getAll();
     }
 
-    @GetMapping("/users/getAll")
+    @GetMapping(value="/users/getAll", produces = { "application/json" })
     public List<UserDto> getAllUsers() {
         return userService.getAll();
     }
 
-    @GetMapping("/user/getById/{id}")
+    @GetMapping(value="/user/getById/{id}", produces = { "application/json" })
     public UserResponse getUserById(@PathVariable Long id) {
         return userService.getUserById(id);
     }
 
-    @GetMapping("user/getByEmail/{email}")
+    @GetMapping(value="user/getByEmail/{email}", produces = { "application/json" })
     public ResponseEntity<String> getUserByEmail(@PathVariable String email) {
         UserDto user = userService.getUserByEmail(email);
         if (user != null) {
@@ -46,7 +47,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("/user/getByUserName")
+    @GetMapping(value="/user/getByUserName", produces = { "application/json" })
     public ResponseEntity<?> getUserByName(@RequestParam(name = "user", required = false) String username) {
         UserDto userDto = userService.findUserByName(username);
         if (userDto != null) {
@@ -56,7 +57,7 @@ public class UserController {
         }
     }
 
-    @PostMapping("/user/create")
+    @PostMapping(value="/user/create", consumes={"application/json"}, produces = { "application/json" })
     public ResponseEntity<String> newUser(@RequestBody UserDto user) {
         return userService.addUser(user);
     }

@@ -17,11 +17,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -32,23 +30,21 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(PasswordEncoder passwordEncoder, UserRepository userRepository) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
-
     @Override
-    public UserDetails loadUserByUsername(String username) {
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserDto user = userRepository.findByUserName(username);
-        if(user==null) {
-            throw new NotFoundException("User with username: " + username + "not found");
+        String role;
+        if (user == null) {
+            throw new UsernameNotFoundException("User not found in the database");
         } else {
             Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
-            String role = user.getAccess() ? "ADMIN" : "USER";
+            role = user.getAccess() ? "ADMIN" : "USER";
+
             authorities.add(new SimpleGrantedAuthority(role));
+
             return new User(user.getUserName(), user.getPassword(), authorities);
-            }
         }
+    }
 
     public ResponseEntity<String> addUser(UserDto userDto) {
         if (emailExists(userDto)) {
@@ -56,6 +52,7 @@ public class UserService implements UserDetailsService {
                     + userDto.getEmail());
         } else {
             userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
+            userDto.setAccess(false);
             userRepository.save(userDto);
             return ResponseEntity.status(HttpStatus.OK).body("Success!");
         }
@@ -97,7 +94,7 @@ public class UserService implements UserDetailsService {
         boolean exists = userRepository.existsById(id);
         if (!exists) {
             return ResponseEntity.badRequest().body(
-                    "Student with id" + id + "does not exists");
+                    "Student with id " + id + " does not exists");
         } else {
             userRepository.deleteById(id);
             return ResponseEntity.status(HttpStatus.OK).body(
