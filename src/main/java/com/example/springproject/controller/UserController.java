@@ -1,27 +1,29 @@
 package com.example.springproject.controller;
 
+import com.example.springproject.data.User;
 import com.example.springproject.data.mapper.UserMapper;
 import com.example.springproject.entity.UserDto;
-import com.example.springproject.response.UserResponse;
-import com.example.springproject.service.UserService;
+import com.example.springproject.service.UserServiceImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
+@CrossOrigin("http://localhost:3000")
 public class UserController {
 
-    final UserService userService;
+    final UserServiceImpl userService;
 
-    public UserController(UserService userService) {
+    public UserController(UserServiceImpl userService) {
         this.userService = userService;
     }
 
     //Returns all users in XML format
-    @GetMapping(value = "/users/getAll/xml", produces = { "application/xml" })
+    @GetMapping(value = "/users/getAll/xml", produces = {"application/xml"})
     public List<UserDto> getAllUsersXML() {
         return userService.getAll();
     }
@@ -32,38 +34,43 @@ public class UserController {
     }
 
     @GetMapping("/user/getById/{id}")
-    public UserResponse getUserById(@PathVariable Long id) {
-        return userService.getUserById(id);
+    public ResponseEntity<String> getUserById(@PathVariable Long id) {
+        Optional<UserDto> userOptional = userService.getUserById(id);
+
+        return userOptional.map(user -> ResponseEntity.status(HttpStatus.OK).body("User: " + UserMapper.map(user)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Id doesn't exist"));
     }
 
     @GetMapping("user/getByEmail/{email}")
     public ResponseEntity<String> getUserByEmail(@PathVariable String email) {
-        UserDto user = userService.getUserByEmail(email);
-        if (user != null) {
-            return ResponseEntity.status(HttpStatus.OK).body("User: " + UserMapper.map(user));
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email doesn't exist");
-        }
+        Optional<UserDto> userOptional = userService.getUserByEmail(email);
+
+        return userOptional.map(user -> ResponseEntity.status(HttpStatus.OK).body("User: " + UserMapper.map(user)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email doesn't exist"));
     }
 
     @GetMapping("/user/getByUserName")
     public ResponseEntity<?> getUserByName(@RequestParam(name = "user", required = false) String username) {
-        UserDto userDto = userService.findUserByName(username);
-        if (userDto != null) {
-            return ResponseEntity.ok().body(userDto);
-        } else {
-            return ResponseEntity.badRequest().body("User not found");
-        }
+        Optional<UserDto> user = userService.getUserByName(username);
+
+        return user.map(userDto -> ResponseEntity.status(HttpStatus.OK).body("User: " + UserMapper.map(userDto)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email doesn't exist"));
     }
 
     @PostMapping("/user/create")
-    public ResponseEntity<String> newUser(@RequestBody UserDto user) {
-        return userService.addUser(user);
+    public ResponseEntity<User> createUser(@RequestBody UserDto userDto) {
+        Optional<UserDto> userOptional = userService.createUser(userDto);
+
+        return userOptional.map(user -> new ResponseEntity<>(UserMapper.map(userDto), HttpStatus.CREATED))
+                .orElseGet(() -> new ResponseEntity<>(UserMapper.map(userDto), HttpStatus.FORBIDDEN));
     }
 
     @DeleteMapping("/user/delete/{id}")
     public ResponseEntity<String> deleteUserById(@PathVariable("id") Long id) {
-        return userService.deleteById(id);
+        Optional<UserDto> userOptional = userService.deleteById(id);
+
+        return userOptional.map(user -> ResponseEntity.status(HttpStatus.OK).body("User removed successfully: " + UserMapper.map(user)))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Id doesn't exist"));
     }
 
     @PutMapping("/user/edit/{id}")
