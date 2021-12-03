@@ -13,10 +13,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +46,12 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
     @Override
     public Optional<UserDto> createUser(UserDto userDto) {
+//        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+//        Validator validator = factory.getValidator();
+//        Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
+//        for (ConstraintViolation<UserDto> violation : violations) {
+//            log.error(violation.getMessage());
+//        }
         Optional<UserDto> userOptional = getUserByEmail(userDto.getEmail());
 
         if (!userExists(userDto)) {
