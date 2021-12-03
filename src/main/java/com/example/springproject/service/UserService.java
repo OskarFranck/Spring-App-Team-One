@@ -1,8 +1,10 @@
 package com.example.springproject.service;
 
 import com.example.springproject.entity.UserDto;
+import com.example.springproject.exception.NotFoundGlobalException;
 import com.example.springproject.repo.UserRepository;
 import com.example.springproject.response.UserResponse;
+import com.example.springproject.util.MessageUtil;
 import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +28,7 @@ import java.util.stream.Stream;
 @Transactional
 @Slf4j
 public class UserService implements UserDetailsService {
-
+    private final MessageService messageService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -123,7 +125,8 @@ public class UserService implements UserDetailsService {
 
             return ResponseEntity.status(HttpStatus.OK).body("Successfully updated ");
         } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No user with id " + id + " was found.");
+            throw new NotFoundGlobalException(messageService.getLocalMessage(MessageUtil.USER_ID_NOT_FOUND));
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No user with id " + id + " was found.");
         }
     }
 }
