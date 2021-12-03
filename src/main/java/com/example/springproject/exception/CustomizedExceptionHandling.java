@@ -13,7 +13,8 @@ import java.time.LocalDateTime;
 public class CustomizedExceptionHandling extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({
-            NotFoundGlobalException.class
+            NotFoundGlobalException.class,
+            UnAuthorizedGlobalException.class,
             //lägg era exepctions klasser här
     })
     public ResponseEntity<Object> handleExceptions(GlobalException ex, WebRequest request)  {
