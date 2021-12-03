@@ -52,6 +52,7 @@ public class UserService implements UserDetailsService {
                     + userDto.getEmail());
         } else {
             userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
+            userDto.setAccess(false);
             userRepository.save(userDto);
             return ResponseEntity.status(HttpStatus.OK).body("Success!");
         }
