@@ -5,6 +5,7 @@ import com.example.springproject.entity.UserDto;
 import com.example.springproject.exception.NotFoundGlobalException;
 import com.example.springproject.response.UserResponse;
 import com.example.springproject.service.MessageService;
+import com.example.springproject.request_body.EditUserRequestBody;
 import com.example.springproject.service.UserService;
 import com.example.springproject.util.MessageUtil;
 import jakarta.ws.rs.NotFoundException;
@@ -17,8 +18,6 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 @RequestMapping("/api")
 public class UserController {
 
@@ -46,38 +45,58 @@ public class UserController {
         return new UserResponse(user.get());
     }
 
-    @GetMapping(value="user/getByEmail/{email}", produces = { "application/json" })
-    public ResponseEntity<String> getUserByEmail(@PathVariable String email) {
-        UserDto user = userService.getUserByEmail(email);
-        if (user != null) {
-            return ResponseEntity.status(HttpStatus.OK).body("User: " + UserMapper.map(user));
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email doesn't exist");
-        }
+    @GetMapping(value = "user/getByEmail/{email}", produces = {"application/json"})
+    public ResponseEntity<?> getUserByEmail(@PathVariable String email) {
+        Optional<UserDto> userOptional = userService.getUserByEmail(email);
+
+        if (userOptional.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email doesn't exist");
+
+        return ResponseEntity.status(HttpStatus.OK).body(UserMapper.map(userOptional.get()));
+
     }
 
-    @GetMapping(value="/user/getByUserName", produces = { "application/json" })
+    @GetMapping(value = "/user/getByUserName", produces = {"application/json"})
     public ResponseEntity<?> getUserByName(@RequestParam(name = "user", required = false) String username) {
-        UserDto userDto = userService.findUserByName(username);
-        if (userDto != null) {
-            return ResponseEntity.ok().body(userDto);
-        } else {
-            return ResponseEntity.badRequest().body("User not found");
-        }
+        Optional<UserDto> userOptional = userService.getUserByName(username);
+
+        if (userOptional.isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Can't find user by that email");
+
+        return ResponseEntity.status(HttpStatus.OK).body(UserMapper.map(userOptional.get()));
     }
 
-    @PostMapping(value="/user/create", consumes={"application/json"}, produces = { "application/json" })
-    public ResponseEntity<String> newUser(@RequestBody UserDto user) {
-        return userService.addUser(user);
+    @PostMapping(value = "/user/create", consumes = {"application/json"}, produces = {"application/json"})
+    public ResponseEntity<?> createUser(@RequestBody UserDto userDto) {
+        Optional<UserDto> userOptional = userService.createUser(userDto);
+
+        if (userOptional.isPresent())
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User with that email or username already exists");
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(UserMapper.map(userDto));
     }
 
     @DeleteMapping("/user/delete/{id}")
-    public ResponseEntity<String> deleteUserById(@PathVariable("id") Long id) {
-        return userService.deleteById(id);
+    public ResponseEntity<?> deleteUserById(@PathVariable("id") Long id) {
+        Optional<UserDto> userOptional = userService.deleteById(id);
+
+        if (userOptional.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User with that ID not found");
+
+        return ResponseEntity.status(HttpStatus.OK).body(UserMapper.map(userOptional.get()));
     }
 
-    @PutMapping("/user/edit/{id}")
-    public ResponseEntity<String> updateUserById(@PathVariable("id") Long id, @RequestBody UserDto user) {
-        return userService.updateUserById(id, user);
+    @PutMapping("/user/edit/{userName}")
+    public ResponseEntity<?> updateProfile(@PathVariable("userName") String userName, @RequestBody EditUserRequestBody editUserRequestBody) {
+        if (editUserRequestBody.getUserNameFromToken().equals("empty") && !editUserRequestBody.getUser().getAccess())
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized");
+
+        Optional<UserDto> userOptional = userService.updateUserByUserName(userName, editUserRequestBody.getChoice(), editUserRequestBody.getUser());
+
+        if (userOptional.isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No user with username " + editUserRequestBody.getUser().getUserName() + " was found.");
+
+        else if (userOptional.stream().anyMatch(Objects::isNull))
+            return ResponseEntity.badRequest().body("One or more fields are not filled. Please enter a value for all attributes.");
+
+        else return ResponseEntity.status(HttpStatus.OK).body("Successfully updated ");
     }
 }

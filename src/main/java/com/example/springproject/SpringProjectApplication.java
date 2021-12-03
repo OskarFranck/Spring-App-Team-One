@@ -1,8 +1,5 @@
 package com.example.springproject;
 
-import com.example.springproject.entity.UserDto;
-import com.example.springproject.service.UserService;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -27,7 +24,7 @@ public class SpringProjectApplication {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**").allowedOrigins("*");
+                registry.addMapping("/**").allowedOrigins("http://localhost:3000");
             }
         };
     }
