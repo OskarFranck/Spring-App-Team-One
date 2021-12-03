@@ -2,23 +2,28 @@ package com.example.springproject.controller;
 
 import com.example.springproject.data.mapper.UserMapper;
 import com.example.springproject.entity.UserDto;
+import com.example.springproject.exception.NotFoundGlobalException;
 import com.example.springproject.response.UserResponse;
+import com.example.springproject.service.MessageService;
 import com.example.springproject.service.UserService;
+import com.example.springproject.util.MessageUtil;
+import jakarta.ws.rs.NotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api")
 public class UserController {
 
-    final UserService userService;
+    private final UserService userService;
+    private final MessageService messageService;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
 
     //Returns all users in XML format
     @GetMapping(value = "/users/getAll/xml", produces = { "application/xml" })
@@ -33,7 +38,11 @@ public class UserController {
 
     @GetMapping(value="/user/getById/{id}", produces = { "application/json" })
     public UserResponse getUserById(@PathVariable Long id) {
-        return userService.getUserById(id);
+
+        Optional <UserDto> user = userService.getUserById(id);
+        if (user.isEmpty()) {throw new NotFoundGlobalException(messageService.getLocalMessage(MessageUtil.USER_ID_NOT_FOUND));}
+
+        return new UserResponse(user.get());
     }
 
     @GetMapping(value="user/getByEmail/{email}", produces = { "application/json" })
