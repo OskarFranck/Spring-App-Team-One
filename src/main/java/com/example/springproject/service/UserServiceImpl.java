@@ -1,9 +1,11 @@
 package com.example.springproject.service;
 
 import com.example.springproject.entity.UserDto;
+import com.example.springproject.exception.GlobalException;
 import com.example.springproject.repo.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,10 +15,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
 import java.util.*;
 
 @Service
@@ -33,7 +31,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         Optional<UserDto> userOptional = userRepository.findByUserName(username);
         String role;
         if (userOptional.isEmpty()) {
-            throw new UsernameNotFoundException("User not found in the database");
+            throw new GlobalException(HttpStatus.FORBIDDEN,"User not found in the database");
         } else {
             Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
             role = userOptional.get().getAccess() ? "ADMIN" : "USER";
@@ -46,12 +44,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
     @Override
     public Optional<UserDto> createUser(UserDto userDto) {
-//        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-//        Validator validator = factory.getValidator();
-//        Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
-//        for (ConstraintViolation<UserDto> violation : violations) {
-//            log.error(violation.getMessage());
-//        }
+
         Optional<UserDto> userOptional = getUserByEmail(userDto.getEmail());
 
         if (!userExists(userDto)) {
@@ -96,9 +89,8 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         return userRepository.findByUserName(userName);
     }
 
-
     @Override
-    public Optional<UserDto> updateUserByUserName(String userName, Integer choice, UserDto userDto) {
+    public Optional<UserDto> updateUserByUserName(String userName, Integer choice) {
         Optional<UserDto> userOptional = userRepository.findByUserName(userName);
 
         if (userOptional.isEmpty()) return userOptional;
@@ -107,13 +99,13 @@ public class UserServiceImpl implements UserDetailsService, UserService {
 
         switch (choice) {
             case 1:
-                user.setUserName(userDto.getUserName());
+                user.setUserName(userOptional.get().getUserName());
                 break;
             case 2:
-                user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+                user.setPassword(passwordEncoder.encode(userOptional.get().getPassword()));
                 break;
             case 3:
-                user.setEmail(userDto.getEmail());
+                user.setEmail(userOptional.get().getEmail());
                 break;
             default:
                 break;

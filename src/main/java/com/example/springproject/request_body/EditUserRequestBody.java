@@ -1,7 +1,9 @@
 package com.example.springproject.request_body;
 
-import com.example.springproject.entity.UserDto;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
 @Getter
 @EqualsAndHashCode
@@ -9,7 +11,8 @@ import lombok.*;
 @AllArgsConstructor
 public class EditUserRequestBody {
     String userName;
+    String email;
+    String password;
     String userNameFromToken;
     Integer choice;
-    UserDto user;
 }

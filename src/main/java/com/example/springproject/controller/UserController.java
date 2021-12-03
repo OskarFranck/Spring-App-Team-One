@@ -3,12 +3,12 @@ package com.example.springproject.controller;
 import com.example.springproject.data.mapper.UserMapper;
 import com.example.springproject.entity.UserDto;
 import com.example.springproject.exception.NotFoundGlobalException;
+import com.example.springproject.exception.UnAuthorizedGlobalException;
+import com.example.springproject.request_body.EditUserRequestBody;
 import com.example.springproject.response.UserResponse;
 import com.example.springproject.service.MessageService;
-import com.example.springproject.request_body.EditUserRequestBody;
 import com.example.springproject.service.UserService;
 import com.example.springproject.util.MessageUtil;
-import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,12 +18,12 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api")
 public class UserController {
 
     private final UserService userService;
     private final MessageService messageService;
-
 
     //Returns all users in XML format
     @GetMapping(value = "/users/getAll/xml", produces = { "application/xml" })
@@ -31,7 +31,7 @@ public class UserController {
         return userService.getAll();
     }
 
-    @GetMapping(value="/users/getAll", produces = { "application/json" })
+    @GetMapping(value = "/users/getAll", produces = {"application/json"})
     public List<UserDto> getAllUsers() {
         return userService.getAll();
     }
@@ -86,17 +86,13 @@ public class UserController {
 
     @PutMapping("/user/edit/{userName}")
     public ResponseEntity<?> updateProfile(@PathVariable("userName") String userName, @RequestBody EditUserRequestBody editUserRequestBody) {
-        if (editUserRequestBody.getUserNameFromToken().equals("empty") && !editUserRequestBody.getUser().getAccess())
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized");
+        Optional<UserDto> user = userService.updateUserByUserName(userName, editUserRequestBody.getChoice());
 
-        Optional<UserDto> userOptional = userService.updateUserByUserName(userName, editUserRequestBody.getChoice(), editUserRequestBody.getUser());
+        if (user.isEmpty()) throw new NotFoundGlobalException(messageService.getLocalMessage(MessageUtil.USER_NAME_NOT_FOUND));
 
-        if (userOptional.isEmpty())
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No user with username " + editUserRequestBody.getUser().getUserName() + " was found.");
+        else if (editUserRequestBody.getUserNameFromToken().equals("empty") && !user.get().getAccess())
+            throw new UnAuthorizedGlobalException(messageService.getLocalMessage(MessageUtil.UNAUTHORIZED));
 
-        else if (userOptional.stream().anyMatch(Objects::isNull))
-            return ResponseEntity.badRequest().body("One or more fields are not filled. Please enter a value for all attributes.");
-
-        else return ResponseEntity.status(HttpStatus.OK).body("Successfully updated ");
+        return ResponseEntity.status(HttpStatus.OK).body("Successfully updated ");
     }
 }
