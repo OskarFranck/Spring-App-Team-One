@@ -1,6 +1,5 @@
 package com.example.springproject.data;
 
-import com.sun.istack.NotNull;
 import lombok.*;
 
 @Builder
@@ -11,8 +10,9 @@ import lombok.*;
 @NoArgsConstructor
 public class User {
 
-    @NotNull
+    @NonNull
     private String email;
+    @NonNull
     private String userName;
 
 }

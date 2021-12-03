@@ -2,6 +2,7 @@ package com.example.springproject.controller;
 
 import com.example.springproject.data.mapper.UserMapper;
 import com.example.springproject.entity.UserDto;
+import com.example.springproject.request_body.EditUserRequestBody;
 import com.example.springproject.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -76,26 +77,24 @@ public class UserController {
     public ResponseEntity<?> deleteUserById(@PathVariable("id") Long id) {
         Optional<UserDto> userOptional = userService.deleteById(id);
 
-        if (userOptional.isEmpty())
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User with that ID not found");
+        if (userOptional.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User with that ID not found");
 
         return ResponseEntity.status(HttpStatus.OK).body(UserMapper.map(userOptional.get()));
     }
 
     @PutMapping("/user/edit/{userName}")
-    public ResponseEntity<?> updateUserById(@PathVariable("userName") String userName, String userNameFromToken, Integer choice, @RequestBody UserDto user) {
-        if (!userName.equals(userNameFromToken) && !user.getAccess())
+    public ResponseEntity<?> updateProfile(@PathVariable("userName") String userName, @RequestBody EditUserRequestBody editUserRequestBody) {
+        if (editUserRequestBody.getUserNameFromToken().equals("empty") && !editUserRequestBody.getUser().getAccess())
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized");
 
-        Optional<UserDto> userOptional = userService.updateUserByUserName(userName, choice, user);
+        Optional<UserDto> userOptional = userService.updateUserByUserName(userName, editUserRequestBody.getChoice(), editUserRequestBody.getUser());
 
         if (userOptional.isEmpty())
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No user with username " + user.getUserName() + " was found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No user with username " + editUserRequestBody.getUser().getUserName() + " was found.");
 
         else if (userOptional.stream().anyMatch(Objects::isNull))
             return ResponseEntity.badRequest().body("One or more fields are not filled. Please enter a value for all attributes.");
 
         else return ResponseEntity.status(HttpStatus.OK).body("Successfully updated ");
-
     }
 }
