@@ -2,7 +2,9 @@ package com.example.springproject.service;
 
 import com.example.springproject.entity.UserDto;
 import com.example.springproject.exception.GlobalException;
+import com.example.springproject.exception.NotFoundGlobalException;
 import com.example.springproject.repo.UserRepository;
+import com.example.springproject.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -31,7 +33,7 @@ public class UserServiceImpl implements UserDetailsService, UserService {
         Optional<UserDto> userOptional = userRepository.findByUserName(username);
         String role;
         if (userOptional.isEmpty()) {
-            throw new GlobalException(HttpStatus.FORBIDDEN,"User not found in the database");
+            throw new NotFoundGlobalException(MessageUtil.USER_NAME_NOT_FOUND);
         } else {
             Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
             role = userOptional.get().getAccess() ? "ADMIN" : "USER";

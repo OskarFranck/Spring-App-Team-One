@@ -2,6 +2,7 @@ package com.example.springproject.controller;
 
 import com.example.springproject.data.mapper.UserMapper;
 import com.example.springproject.entity.UserDto;
+import com.example.springproject.exception.AlreadyExistsGlobalException;
 import com.example.springproject.exception.NotFoundGlobalException;
 import com.example.springproject.exception.UnAuthorizedGlobalException;
 import com.example.springproject.request_body.EditUserRequestBody;
@@ -9,6 +10,7 @@ import com.example.springproject.response.UserResponse;
 import com.example.springproject.service.MessageService;
 import com.example.springproject.service.UserService;
 import com.example.springproject.util.MessageUtil;
+import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,22 +28,24 @@ public class UserController {
     private final MessageService messageService;
 
     //Returns all users in XML format
-    @GetMapping(value = "/users/getAll/xml", produces = { "application/xml" })
+    @GetMapping(value = "/users/getAll/xml", produces = {"application/xml"})
     public List<UserDto> getAllUsersXML() {
-        return userService.getAll();
+        List<UserDto> users = userService.getAll();
+        if (users.isEmpty()) throw new NotFoundGlobalException(MessageUtil.USERS_NOT_FOUND);
+        return users;
     }
 
     @GetMapping(value = "/users/getAll", produces = {"application/json"})
     public List<UserDto> getAllUsers() {
-        return userService.getAll();
+        List<UserDto> users = userService.getAll();
+        if (users.isEmpty()) throw new NotFoundGlobalException(MessageUtil.USERS_NOT_FOUND);
+        return users;
     }
 
-    @GetMapping(value="/user/getById/{id}", produces = { "application/json" })
+    @GetMapping(value = "/user/getById/{id}", produces = {"application/json"})
     public UserResponse getUserById(@PathVariable Long id) {
-
-        Optional <UserDto> user = userService.getUserById(id);
-        if (user.isEmpty()) {throw new NotFoundGlobalException(messageService.getLocalMessage(MessageUtil.USER_ID_NOT_FOUND));}
-
+        Optional<UserDto> user = userService.getUserById(id);
+        if (user.isEmpty()) throw new NotFoundGlobalException(messageService.getLocalMessage(MessageUtil.USER_ID_NOT_FOUND));
         return new UserResponse(user.get());
     }
 
@@ -49,10 +53,10 @@ public class UserController {
     public ResponseEntity<?> getUserByEmail(@PathVariable String email) {
         Optional<UserDto> userOptional = userService.getUserByEmail(email);
 
-        if (userOptional.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email doesn't exist");
+        if (userOptional.isEmpty())
+            throw new NotFoundGlobalException(messageService.getLocalMessage(MessageUtil.USER_EMAIL_NOT_FOUND));
 
         return ResponseEntity.status(HttpStatus.OK).body(UserMapper.map(userOptional.get()));
-
     }
 
     @GetMapping(value = "/user/getByUserName", produces = {"application/json"})
@@ -70,7 +74,7 @@ public class UserController {
         Optional<UserDto> userOptional = userService.createUser(userDto);
 
         if (userOptional.isPresent())
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User with that email or username already exists");
+            throw new AlreadyExistsGlobalException(messageService.getLocalMessage(MessageUtil.ALREADY_EXISTS));
 
         return ResponseEntity.status(HttpStatus.CREATED).body(UserMapper.map(userDto));
     }
@@ -79,7 +83,8 @@ public class UserController {
     public ResponseEntity<?> deleteUserById(@PathVariable("id") Long id) {
         Optional<UserDto> userOptional = userService.deleteById(id);
 
-        if (userOptional.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User with that ID not found");
+        if (userOptional.isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User with that ID not found");
 
         return ResponseEntity.status(HttpStatus.OK).body(UserMapper.map(userOptional.get()));
     }
@@ -88,7 +93,8 @@ public class UserController {
     public ResponseEntity<?> updateProfile(@PathVariable("userName") String userName, @RequestBody EditUserRequestBody editUserRequestBody) {
         Optional<UserDto> user = userService.updateUserByUserName(userName, editUserRequestBody.getChoice());
 
-        if (user.isEmpty()) throw new NotFoundGlobalException(messageService.getLocalMessage(MessageUtil.USER_NAME_NOT_FOUND));
+        if (user.isEmpty())
+            throw new NotFoundGlobalException(messageService.getLocalMessage(MessageUtil.USER_NAME_NOT_FOUND));
 
         else if (editUserRequestBody.getUserNameFromToken().equals("empty") && !user.get().getAccess())
             throw new UnAuthorizedGlobalException(messageService.getLocalMessage(MessageUtil.UNAUTHORIZED));
