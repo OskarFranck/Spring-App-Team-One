@@ -1,6 +1,8 @@
 package com.example.springproject.controller;
 
+import com.example.springproject.data.User;
 import com.example.springproject.data.mapper.UserMapper;
+import com.example.springproject.data.mapper.UsersMapper;
 import com.example.springproject.entity.UserDto;
 import com.example.springproject.exception.AlreadyExistsGlobalException;
 import com.example.springproject.exception.NotFoundGlobalException;
@@ -29,17 +31,17 @@ public class UserController {
 
     //Returns all users in XML format
     @GetMapping(value = "/users/getAll/xml", produces = {"application/xml"})
-    public List<UserDto> getAllUsersXML() {
+    public List<User> getAllUsersXML() {
         List<UserDto> users = userService.getAll();
         if (users.isEmpty()) throw new NotFoundGlobalException(MessageUtil.USERS_NOT_FOUND);
-        return users;
+        return UsersMapper.map(users);
     }
 
     @GetMapping(value = "/users/getAll", produces = {"application/json"})
-    public List<UserDto> getAllUsers() {
+    public List<User> getAllUsers() {
         List<UserDto> users = userService.getAll();
         if (users.isEmpty()) throw new NotFoundGlobalException(MessageUtil.USERS_NOT_FOUND);
-        return users;
+        return UsersMapper.map(users);
     }
 
     @GetMapping(value = "/user/getById/{id}", produces = {"application/json"})
@@ -86,7 +88,7 @@ public class UserController {
         if (userOptional.isEmpty())
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User with that ID not found");
 
-        return ResponseEntity.status(HttpStatus.OK).body(UserMapper.map(userOptional.get()));
+        return ResponseEntity.status(HttpStatus.OK).body("Deleting of following user succeeded: "+ UserMapper.map(userOptional.get()));
     }
 
     @PutMapping("/user/edit/{userName}")
@@ -99,6 +101,6 @@ public class UserController {
         else if (editUserRequestBody.getUserNameFromToken().equals("empty") && !user.get().getAccess())
             throw new UnAuthorizedGlobalException(messageService.getLocalMessage(MessageUtil.UNAUTHORIZED));
 
-        return ResponseEntity.status(HttpStatus.OK).body("Successfully updated ");
+        return ResponseEntity.status(HttpStatus.OK).body("Successfully updated: " + UserMapper.map(user.get()));
     }
 }
