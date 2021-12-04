@@ -81,22 +81,16 @@ public class UserService implements UserDetailsService {
         return userRepository.findAll();
     }
 
-
     public Optional<UserDto> getUserById(Long id) {
         Optional<UserDto> userDtoOptional = userRepository.findById(id);
         return userDtoOptional;
     }
 
-    public ResponseEntity<?> deleteById(Long id) {
-        boolean exists = userRepository.existsById(id);
-        if (!exists) {
-            return ResponseEntity.badRequest().body(
-                    "Student with id " + id + " does not exists");
-        } else {
-            userRepository.deleteById(id);
-            return ResponseEntity.status(HttpStatus.OK).body(
-                    "Student with id" + id + "removed successfully");
-        }
+    public Optional<UserDto> deleteById(Long id) {
+        Optional<UserDto> userDeleteDtoOptional = userRepository.findById(id);
+        if (userDeleteDtoOptional.isPresent())userRepository.deleteById(id);
+        return userDeleteDtoOptional;
+
     }
 
     public UserDto findUserByName(String userName) {
