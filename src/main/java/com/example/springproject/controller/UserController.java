@@ -27,26 +27,28 @@ public class UserController {
 
 
     //Returns all users in XML format
-    @GetMapping(value = "/users/getAll/xml", produces = { "application/xml" })
+    @GetMapping(value = "/users/getAll/xml", produces = {"application/xml"})
     public List<UserDto> getAllUsersXML() {
         return userService.getAll();
     }
 
-    @GetMapping(value="/users/getAll", produces = { "application/json" })
+    @GetMapping(value = "/users/getAll", produces = {"application/json"})
     public List<UserDto> getAllUsers() {
         return userService.getAll();
     }
 
-    @GetMapping(value="/user/getById/{id}", produces = { "application/json" })
+    @GetMapping(value = "/user/getById/{id}", produces = {"application/json"})
     public UserResponse getUserById(@PathVariable Long id) {
 
-        Optional <UserDto> user = userService.getUserById(id);
-        if (user.isEmpty()) {throw new NotFoundGlobalException(messageService.getLocalMessage(MessageUtil.USER_ID_NOT_FOUND));}
+        Optional<UserDto> user = userService.getUserById(id);
+        if (user.isEmpty()) {
+            throw new NotFoundGlobalException(messageService.getLocalMessage(MessageUtil.USER_ID_NOT_FOUND));
+        }
 
         return new UserResponse(user.get());
     }
 
-    @GetMapping(value="user/getByEmail/{email}", produces = { "application/json" })
+    @GetMapping(value = "user/getByEmail/{email}", produces = {"application/json"})
     public ResponseEntity<String> getUserByEmail(@PathVariable String email) {
         UserDto user = userService.getUserByEmail(email);
         if (user != null) {
@@ -56,7 +58,7 @@ public class UserController {
         }
     }
 
-    @GetMapping(value="/user/getByUserName", produces = { "application/json" })
+    @GetMapping(value = "/user/getByUserName", produces = {"application/json"})
     public ResponseEntity<?> getUserByName(@RequestParam(name = "user", required = false) String username) {
         UserDto userDto = userService.findUserByName(username);
         if (userDto != null) {
@@ -66,14 +68,16 @@ public class UserController {
         }
     }
 
-    @PostMapping(value="/user/create", consumes={"application/json"}, produces = { "application/json" })
+    @PostMapping(value = "/user/create", consumes = {"application/json"}, produces = {"application/json"})
     public ResponseEntity<String> newUser(@RequestBody UserDto user) {
         return userService.addUser(user);
     }
 
-    @DeleteMapping("/user/delete/{id}")
-    public ResponseEntity<String> deleteUserById(@PathVariable("id") Long id) {
-        return userService.deleteById(id);
+    @DeleteMapping("/users/delete/{id}")
+    public UserResponse deleteUserById(@PathVariable("id") Long id) {
+        Optional<UserDto> user = userService.deleteById(id);
+        if (user.isEmpty()) throw new NotFoundGlobalException(messageService.getLocalMessage(MessageUtil.USER_ID_NOT_FOUND));
+        return new UserResponse(user.get());
     }
 
     @PutMapping("/user/edit/{id}")
