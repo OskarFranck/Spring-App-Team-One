@@ -92,7 +92,7 @@ public class UserController {
     }
 
     @PutMapping("/user/edit/{userName}")
-    public ResponseEntity<?> updateProfile(@PathVariable("userName") String userName, @RequestBody EditUserRequestBody editUserRequestBody) {
+    public ResponseEntity<?> updateUser(@PathVariable("userName") String userName, @RequestBody EditUserRequestBody editUserRequestBody) {
         Optional<UserDto> user = userService.updateUserByUserName(userName, editUserRequestBody.getChoice());
 
         if (user.isEmpty())
