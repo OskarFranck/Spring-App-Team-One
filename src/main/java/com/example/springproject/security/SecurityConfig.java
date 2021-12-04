@@ -44,7 +44,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and().authorizeRequests().antMatchers("/api/login/**", "/api/user/create").permitAll()
                 .and().authorizeRequests().anyRequest().authenticated()
                 .and().addFilter(customAuthenticationFilter)
-                .addFilterBefore(new CustomAuthorizationFilter(key), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new CustomAuthorizationFilter(key), UsernamePasswordAuthenticationFilter.class)
     }
 
     @Bean
