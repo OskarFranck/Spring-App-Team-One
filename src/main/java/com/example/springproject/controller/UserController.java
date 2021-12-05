@@ -75,14 +75,13 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(UserMapper.map(userDto));
     }
 
-    @DeleteMapping("/user/delete/{id}")
-    public ResponseEntity<?> deleteUserById(@PathVariable("id") Long id) {
-        Optional<UserDto> userOptional = userService.deleteById(id);
-
-        if (userOptional.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User with that ID not found");
-
-        return ResponseEntity.status(HttpStatus.OK).body(UserMapper.map(userOptional.get()));
+    @DeleteMapping("/users/delete/{id}")
+    public UserResponse deleteUserById(@PathVariable("id") Long id) {
+        Optional<UserDto> user = userService.deleteById(id);
+        if (user.isEmpty()) throw new NotFoundGlobalException(messageService.getLocalMessage(MessageUtil.USER_ID_NOT_FOUND));
+        return new UserResponse(user.get());
     }
+
 
     @PutMapping("/user/edit/{userName}")
     public ResponseEntity<?> updateProfile(@PathVariable("userName") String userName, @RequestBody EditUserRequestBody editUserRequestBody) {
