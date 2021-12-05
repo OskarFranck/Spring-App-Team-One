@@ -13,7 +13,6 @@ import com.example.springproject.response.UserResponse;
 import com.example.springproject.service.MessageService;
 import com.example.springproject.service.UserService;
 import com.example.springproject.util.MessageUtil;
-import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -67,7 +66,7 @@ public class UserController {
         Optional<UserDto> userOptional = userService.getUserByName(username);
 
         if (userOptional.isEmpty())
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Can't find user by that email");
+            throw new NotFoundGlobalException(messageService.getLocalMessage(MessageUtil.USER_NAME_NOT_FOUND));
 
         return ResponseEntity.status(HttpStatus.OK).body(UserMapper.map(userOptional.get()));
     }
@@ -83,8 +82,8 @@ public class UserController {
     }
 
     @DeleteMapping("/users/delete/{username}")
-    public UserResponse deleteUserById(@PathVariable("username") String username, @RequestBody DeleteUserRequestBody deleteUserRequestBody) {
-        Optional<UserDto> user = userService.deleteById(deleteUserRequestBody.getUsernameFromToken());
+    public UserResponse deleteUserById(@PathVariable("username") String username) {
+        Optional<UserDto> user = userService.deleteByUsername(username);
         if (user.isEmpty()) throw new NotFoundGlobalException(messageService.getLocalMessage(MessageUtil.USER_ID_NOT_FOUND));
         return new UserResponse(user.get());
     }

@@ -80,9 +80,9 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     }
 
     @Override
-    public Optional<UserDto> deleteById(Long id) {
-        Optional<UserDto> userOptional = userRepository.findById(id);
-        if (userOptional.isPresent()) userRepository.deleteById(id);
+    public Optional<UserDto> deleteByUsername(String username) {
+        Optional<UserDto> userOptional = userRepository.findByUserName(username);
+        userOptional.ifPresent(userDto -> userRepository.deleteById(userDto.getId()));
         return userOptional;
     }
 
