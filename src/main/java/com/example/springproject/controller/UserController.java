@@ -3,7 +3,6 @@ package com.example.springproject.controller;
 import com.example.springproject.data.User;
 import com.example.springproject.data.mapper.UserMapper;
 import com.example.springproject.data.mapper.UsersMapper;
-import com.example.springproject.delete.DeleteUserRequestBody;
 import com.example.springproject.entity.UserDto;
 import com.example.springproject.exception.AlreadyExistsGlobalException;
 import com.example.springproject.exception.NotFoundGlobalException;
@@ -82,7 +81,7 @@ public class UserController {
     }
 
     @DeleteMapping("/users/delete/{username}")
-    public UserResponse deleteUserById(@PathVariable("username") String username) {
+    public UserResponse deleteUserByUsername(@PathVariable("username") String username) {
         Optional<UserDto> user = userService.deleteByUsername(username);
         if (user.isEmpty()) throw new NotFoundGlobalException(messageService.getLocalMessage(MessageUtil.USER_ID_NOT_FOUND));
         return new UserResponse(user.get());
@@ -96,7 +95,7 @@ public class UserController {
         if (user.isEmpty())
             throw new NotFoundGlobalException(messageService.getLocalMessage(MessageUtil.USER_NAME_NOT_FOUND));
 
-        else if (editUserRequestBody.getUserNameFromToken().equals("empty") && !user.get().getAccess())
+        else if (editUserRequestBody.getUserNameFromToken().equals(userName) && !user.get().getAccess())
             throw new UnAuthorizedGlobalException(messageService.getLocalMessage(MessageUtil.UNAUTHORIZED));
 
         return ResponseEntity.status(HttpStatus.OK).body("Successfully updated: " + UserMapper.map(user.get()));
