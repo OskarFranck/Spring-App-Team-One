@@ -95,24 +95,27 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     @Override
     public Optional<UserDto> updateUserByUserName(String userName, EditUserRequestBody editUserRequestBody, MessageService messageService) {
         Optional<UserDto> userOptional = userRepository.findByUserName(userName);
+        Optional<UserDto> editingUser = userRepository.findByUserName(editUserRequestBody.getUsernameFromToken());
 
         if (userOptional.isEmpty()) return userOptional;
 
-        else if (!editUserRequestBody.getUserNameFromToken().equals(userName) && !userOptional.get().getAccess())
+        else if (!editUserRequestBody.getUsernameFromToken().equals(userName) && (editingUser.isPresent() && !editingUser.get().getAccess()))
             throw new UnAuthorizedGlobalException(messageService.getLocalMessage(MessageUtil.UNAUTHORIZED));
 
         UserDto user = userOptional.get();
 
         switch (editUserRequestBody.getChoice()) {
             case 1:
-                user.setUserName(userOptional.get().getUserName());
+                user.setUserName(editUserRequestBody.getUsername());
                 break;
             case 2:
-                user.setPassword(passwordEncoder.encode(userOptional.get().getPassword()));
+                user.setPassword(passwordEncoder.encode(editUserRequestBody.getPassword()));
                 break;
             case 3:
-                user.setEmail(userOptional.get().getEmail());
+                user.setEmail(editUserRequestBody.getEmail());
                 break;
+            case 4:
+                user.setAccess(editUserRequestBody.getAccess());
             default:
                 break;
         }

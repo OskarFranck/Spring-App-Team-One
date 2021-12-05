@@ -10,9 +10,10 @@ import lombok.ToString;
 @ToString
 @AllArgsConstructor
 public class EditUserRequestBody {
-    String userName;
+    String username;
     String email;
     String password;
-    String userNameFromToken;
+    String usernameFromToken;
     Integer choice;
+    Boolean access;
 }
