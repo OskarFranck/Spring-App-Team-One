@@ -1,6 +1,7 @@
 package com.example.springproject.controller;
 
 import com.example.springproject.data.mapper.UserMapper;
+import com.example.springproject.delete.DeleteUserRequestBody;
 import com.example.springproject.entity.UserDto;
 import com.example.springproject.exception.NotFoundGlobalException;
 import com.example.springproject.response.UserResponse;
@@ -60,9 +61,9 @@ public class UserController {
 
     @GetMapping(value = "/user/getByUserName", produces = {"application/json"})
     public ResponseEntity<?> getUserByName(@RequestParam(name = "user", required = false) String username) {
-        UserDto userDto = userService.findUserByName(username);
-        if (userDto != null) {
-            return ResponseEntity.ok().body(userDto);
+        Optional<UserDto> user = userService.findUserByName(username);
+        if (user.isPresent()) {
+            return ResponseEntity.ok().body(user);
         } else {
             return ResponseEntity.badRequest().body("User not found");
         }
@@ -73,9 +74,9 @@ public class UserController {
         return userService.addUser(user);
     }
 
-    @DeleteMapping("/users/delete/{id}")
-    public UserResponse deleteUserById(@PathVariable("id") Long id) {
-        Optional<UserDto> user = userService.deleteById(id);
+    @DeleteMapping("/users/delete/{username}")
+    public UserResponse deleteUserById(@PathVariable("username") String username, @RequestBody DeleteUserRequestBody deleteUserRequestBody) {
+        Optional<UserDto> user = userService.deleteById(deleteUserRequestBody.getUsernameFromToken());
         if (user.isEmpty()) throw new NotFoundGlobalException(messageService.getLocalMessage(MessageUtil.USER_ID_NOT_FOUND));
         return new UserResponse(user.get());
     }

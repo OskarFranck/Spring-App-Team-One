@@ -32,17 +32,17 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserDto user = userRepository.findByUserName(username);
+        Optional<UserDto> user = userRepository.findByUserName(username);
         String role;
-        if (user == null) {
+        if (user.isEmpty()) {
             throw new UsernameNotFoundException("User not found in the database");
         } else {
             Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
-            role = user.getAccess() ? "ADMIN" : "USER";
+            role = user.get().getAccess() ? "ADMIN" : "USER";
 
             authorities.add(new SimpleGrantedAuthority(role));
 
-            return new User(user.getUserName(), user.getPassword(), authorities);
+            return new User(user.get().getUserName(), user.get().getPassword(), authorities);
         }
     }
 
@@ -86,14 +86,14 @@ public class UserService implements UserDetailsService {
         return userDtoOptional;
     }
 
-    public Optional<UserDto> deleteById(Long id) {
-        Optional<UserDto> userDeleteDtoOptional = userRepository.findById(id);
-        if (userDeleteDtoOptional.isPresent())userRepository.deleteById(id);
+    public Optional<UserDto> deleteById(String username) {
+        Optional<UserDto> userDeleteDtoOptional = userRepository.findByUserName(username);
+        userDeleteDtoOptional.ifPresent(userDto -> userRepository.deleteById(userDto.getId()));
         return userDeleteDtoOptional;
 
     }
 
-    public UserDto findUserByName(String userName) {
+    public Optional<UserDto> findUserByName(String userName) {
         return userRepository.findByUserName(userName);
     }
 

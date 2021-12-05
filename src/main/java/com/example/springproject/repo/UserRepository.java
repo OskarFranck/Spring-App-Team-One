@@ -4,8 +4,10 @@ import com.example.springproject.entity.UserDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface UserRepository extends JpaRepository<UserDto, Long> {
-    UserDto findByUserName(String userName);
+    Optional<UserDto> findByUserName(String userName);
     UserDto findByEmail(String email);
 }
