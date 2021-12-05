@@ -3,6 +3,7 @@ package com.example.springproject.controller;
 import com.example.springproject.data.User;
 import com.example.springproject.data.mapper.UserMapper;
 import com.example.springproject.data.mapper.UsersMapper;
+import com.example.springproject.delete.DeleteUserRequestBody;
 import com.example.springproject.entity.UserDto;
 import com.example.springproject.exception.AlreadyExistsGlobalException;
 import com.example.springproject.exception.NotFoundGlobalException;
@@ -81,16 +82,9 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(UserMapper.map(userDto));
     }
 
-    @DeleteMapping("/user/delete/{id}")
-    public ResponseEntity<?> deleteUserById(@PathVariable("id") Long id) {
-        Optional<UserDto> userOptional = userService.deleteById(id);
-
-        if (userOptional.isEmpty())
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User with that ID not found");
-    }
-        @DeleteMapping("/users/delete/{id}")
-    public UserResponse deleteUserById(@PathVariable("id") Long id) {
-        Optional<UserDto> user = userService.deleteById(id);
+    @DeleteMapping("/users/delete/{username}")
+    public UserResponse deleteUserById(@PathVariable("username") String username, @RequestBody DeleteUserRequestBody deleteUserRequestBody) {
+        Optional<UserDto> user = userService.deleteById(deleteUserRequestBody.getUsernameFromToken());
         if (user.isEmpty()) throw new NotFoundGlobalException(messageService.getLocalMessage(MessageUtil.USER_ID_NOT_FOUND));
         return new UserResponse(user.get());
     }
