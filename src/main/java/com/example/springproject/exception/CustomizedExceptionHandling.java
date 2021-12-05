@@ -15,6 +15,7 @@ public class CustomizedExceptionHandling extends ResponseEntityExceptionHandler 
     @ExceptionHandler({
             NotFoundGlobalException.class,
             UnAuthorizedGlobalException.class,
+            AlreadyExistsGlobalException.class,
             //lägg era exepctions klasser här
     })
     public ResponseEntity<Object> handleExceptions(GlobalException ex, WebRequest request)  {
@@ -25,9 +26,7 @@ public class CustomizedExceptionHandling extends ResponseEntityExceptionHandler 
 
         HttpStatus status = ex.getStatus() != null ? ex.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
-        ResponseEntity<Object> entity = new ResponseEntity<>(response, status);
-
-        return entity;
+        return new ResponseEntity<>(response, status);
     }
 
 
