@@ -15,15 +15,15 @@ public class UserDto {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "user_name")
+    @Column(name = "user_name", nullable = false, unique = true)
     private String userName;
 
-    @Column(name = "email")
+    @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(name = "hashed_password")
+    @Column(name = "hashed_password", nullable = false)
     private String password;
 
-    @Column(name = "access_level")
+    @Column(name = "access_level", nullable = false)
     private Boolean access;
 }

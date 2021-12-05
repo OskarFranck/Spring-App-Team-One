@@ -16,7 +16,6 @@ public class CustomizedExceptionHandling extends ResponseEntityExceptionHandler 
             NotFoundGlobalException.class,
             UnAuthorizedGlobalException.class,
             AlreadyExistsGlobalException.class,
-            //lägg era exepctions klasser här
     })
     public ResponseEntity<Object> handleExceptions(GlobalException ex, WebRequest request)  {
 
@@ -28,6 +27,5 @@ public class CustomizedExceptionHandling extends ResponseEntityExceptionHandler 
 
         return new ResponseEntity<>(response, status);
     }
-
 
 }

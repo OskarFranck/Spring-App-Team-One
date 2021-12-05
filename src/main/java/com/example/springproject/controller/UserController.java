@@ -6,7 +6,6 @@ import com.example.springproject.data.mapper.UsersMapper;
 import com.example.springproject.entity.UserDto;
 import com.example.springproject.exception.AlreadyExistsGlobalException;
 import com.example.springproject.exception.NotFoundGlobalException;
-import com.example.springproject.exception.UnAuthorizedGlobalException;
 import com.example.springproject.request_body.EditUserRequestBody;
 import com.example.springproject.response.UserResponse;
 import com.example.springproject.service.MessageService;
@@ -60,8 +59,8 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(UserMapper.map(userOptional.get()));
     }
 
-    @GetMapping(value = "/user/getByUserName", produces = {"application/json"})
-    public ResponseEntity<?> getUserByName(@RequestParam(name = "user", required = false) String username) {
+    @GetMapping(value = "/user/getByUserName/{username}", produces = {"application/json"})
+    public ResponseEntity<?> getUserByName(@PathVariable String username) {
         Optional<UserDto> userOptional = userService.getUserByName(username);
 
         if (userOptional.isEmpty())
@@ -72,9 +71,9 @@ public class UserController {
 
     @PostMapping(value = "/user/create", consumes = {"application/json"}, produces = {"application/json"})
     public ResponseEntity<?> createUser(@RequestBody UserDto userDto) {
-        Optional<UserDto> userOptional = userService.createUser(userDto);
+        boolean userExist = userService.createUser(userDto);
 
-        if (userOptional.isPresent())
+        if (userExist)
             throw new AlreadyExistsGlobalException(messageService.getLocalMessage(MessageUtil.ALREADY_EXISTS));
 
         return ResponseEntity.status(HttpStatus.CREATED).body(UserMapper.map(userDto));
@@ -90,14 +89,11 @@ public class UserController {
 
     @PutMapping("/user/edit/{userName}")
     public ResponseEntity<?> updateUser(@PathVariable("userName") String userName, @RequestBody EditUserRequestBody editUserRequestBody) {
-        Optional<UserDto> user = userService.updateUserByUserName(userName, editUserRequestBody.getChoice());
+        Optional<UserDto> user = userService.updateUserByUserName(userName, editUserRequestBody, messageService);
 
         if (user.isEmpty())
             throw new NotFoundGlobalException(messageService.getLocalMessage(MessageUtil.USER_NAME_NOT_FOUND));
 
-        else if (editUserRequestBody.getUserNameFromToken().equals(userName) && !user.get().getAccess())
-            throw new UnAuthorizedGlobalException(messageService.getLocalMessage(MessageUtil.UNAUTHORIZED));
-
-        return ResponseEntity.status(HttpStatus.OK).body("Successfully updated: " + UserMapper.map(user.get()));
+        return ResponseEntity.status(HttpStatus.OK).body(UserMapper.map(user.get()));
     }
 }

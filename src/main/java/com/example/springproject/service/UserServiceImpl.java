@@ -3,7 +3,9 @@ package com.example.springproject.service;
 import com.example.springproject.entity.UserDto;
 import com.example.springproject.exception.GlobalException;
 import com.example.springproject.exception.NotFoundGlobalException;
+import com.example.springproject.exception.UnAuthorizedGlobalException;
 import com.example.springproject.repo.UserRepository;
+import com.example.springproject.request_body.EditUserRequestBody;
 import com.example.springproject.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,15 +47,14 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     }
 
     @Override
-    public Optional<UserDto> createUser(UserDto userDto) {
-
-        Optional<UserDto> userOptional = getUserByEmail(userDto.getEmail());
+    public boolean createUser(UserDto userDto) {
 
         if (!userExists(userDto)) {
             userDto.setPassword(passwordEncoder.encode(userDto.getPassword()));
             userRepository.save(userDto);
+            return false;
         }
-        return userOptional;
+        return true;
     }
 
     private boolean userExists(UserDto userDto) {
@@ -92,14 +93,17 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     }
 
     @Override
-    public Optional<UserDto> updateUserByUserName(String userName, Integer choice) {
+    public Optional<UserDto> updateUserByUserName(String userName, EditUserRequestBody editUserRequestBody, MessageService messageService) {
         Optional<UserDto> userOptional = userRepository.findByUserName(userName);
 
         if (userOptional.isEmpty()) return userOptional;
 
+        else if (!editUserRequestBody.getUserNameFromToken().equals(userName) && !userOptional.get().getAccess())
+            throw new UnAuthorizedGlobalException(messageService.getLocalMessage(MessageUtil.UNAUTHORIZED));
+
         UserDto user = userOptional.get();
 
-        switch (choice) {
+        switch (editUserRequestBody.getChoice()) {
             case 1:
                 user.setUserName(userOptional.get().getUserName());
                 break;
