@@ -27,5 +27,4 @@ public class CustomizedExceptionHandling extends ResponseEntityExceptionHandler 
 
         return new ResponseEntity<>(response, status);
     }
-
 }

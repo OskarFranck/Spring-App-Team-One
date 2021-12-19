@@ -1,16 +1,16 @@
 package com.example.springproject.service;
 
 import com.example.springproject.entity.UserDto;
-import com.example.springproject.exception.GlobalException;
 import com.example.springproject.exception.NotFoundGlobalException;
 import com.example.springproject.exception.UnAuthorizedGlobalException;
 import com.example.springproject.repo.UserRepository;
 import com.example.springproject.request_body.EditUserRequestBody;
 import com.example.springproject.util.MessageUtil;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -24,7 +24,6 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 @Transactional
-@Slf4j
 public class UserServiceImpl implements UserDetailsService, UserService {
 
     private final UserRepository userRepository;
@@ -90,6 +89,20 @@ public class UserServiceImpl implements UserDetailsService, UserService {
     @Override
     public Optional<UserDto> getUserByName(String userName) {
         return userRepository.findByUserName(userName);
+    }
+
+    @Override
+    public boolean getCurrentUserAccess() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication instanceof AnonymousAuthenticationToken) return true;
+        return !authentication.getAuthorities().contains(new SimpleGrantedAuthority("ADMIN"));
+    }
+
+    @Override
+    public String getCurrentUserName() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication instanceof AnonymousAuthenticationToken) return null;
+        return authentication.getName();
     }
 
     @Override

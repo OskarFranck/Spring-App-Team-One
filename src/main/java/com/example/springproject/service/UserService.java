@@ -10,6 +10,8 @@ public interface UserService {
     List<UserDto> getAll();
     Optional<UserDto> getUserByEmail(String email);
     Optional<UserDto> getUserById(Long id);
+    boolean getCurrentUserAccess();
+    String getCurrentUserName();
     Optional<UserDto> getUserByName(String userName);
     Optional<UserDto> deleteByUsername(String userName);
     Optional<UserDto> updateUserByUserName(String userName, EditUserRequestBody editUserRequestBody, MessageService messageService);
